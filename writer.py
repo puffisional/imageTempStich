@@ -1,19 +1,32 @@
 # -*- coding: utf-8 -*-
 from PIL import Image, ImageDraw, ImageFont
+from os.path import splitext, split, join, exists
+from os import makedirs
+import numpy as np
+from imageTempStich.videoWriter import FFMPEG_VideoWriter
 
 class Writer():
     
     textPos = (50,120)
     textColor = (255,0,0,255)
     textSize = 40
+    fps = 5
     
     def __init__(self, imageData, outputPath="./"):
         self.imageData = imageData
+        self.outpuPath = outputPath
+        
+        if not exists(self.outpuPath):
+            makedirs(self.outpuPath)
+        
         self.writeImages()
     
     def writeImages(self):
+        
+        videoFile = FFMPEG_VideoWriter(join(self.outpuPath, "videoOutput.mp4"), (1280, 720), fps=self.fps, pixelFormat="rgba")
         for data in self.imageData:
-            self.writeTemperature(data["file"], data["temperature"])
+            img = self.writeTemperature(data["file"], data["temperature"])
+            videoFile.write_frame(np.asanyarray(img))
     
     def writeTemperature(self, imagePath, temperature):
         image = Image.open(imagePath).convert("RGBA")
@@ -29,4 +42,8 @@ class Writer():
         
         #/usr/share/wine/fonts/tahoma.ttf
         out = Image.alpha_composite(image, text)
-        out.show()
+#         out.show()
+        fileExtension = splitext(split(imagePath)[-1])
+        out.save(join(self.outpuPath, "".join((fileExtension[0], "_stich", fileExtension[1]))))
+        
+        return out

@@ -14,4 +14,4 @@ if __name__ == "__main__":
     args = cmdInput.parse_args()
     
     r = reader.Reader(args.logFile, args.inputDir)
-    w = writer.Writer(r.imageData)
+    w = writer.Writer(r.imageData, args.outputDir)
