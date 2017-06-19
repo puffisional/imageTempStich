@@ -10,6 +10,7 @@ if __name__ == "__main__":
     cmdInput = argparse.ArgumentParser()
     cmdInput.add_argument("--logFile", required=True, help="Logfile with temperatures")
     cmdInput.add_argument("--inputDir", default="./", help="Input directory with images")
+    cmdInput.add_argument("--outputDir", default="./", help="Output directory")
     args = cmdInput.parse_args()
     
     r = reader.Reader(args.logFile, args.inputDir)
