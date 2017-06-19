@@ -3,18 +3,18 @@ from PIL import Image, ImageDraw, ImageFont
 from os.path import splitext, split, join, exists
 from os import makedirs
 import numpy as np
-from imageTempStich.videoWriter import FFMPEG_VideoWriter
 
 class Writer():
     
     textPos = (50,120)
     textColor = (255,0,0,255)
     textSize = 40
-    fps = 5
+    fps = 1
     
-    def __init__(self, imageData, outputPath="./"):
+    def __init__(self, imageData, outputPath="./", createVideo="1"):
         self.imageData = imageData
         self.outpuPath = outputPath
+        self.createVideo = createVideo
         
         if not exists(self.outpuPath):
             makedirs(self.outpuPath)
@@ -22,11 +22,15 @@ class Writer():
         self.writeImages()
     
     def writeImages(self):
-        
-        videoFile = FFMPEG_VideoWriter(join(self.outpuPath, "videoOutput.mp4"), (1280, 720), fps=self.fps, pixelFormat="rgba")
+        videoFile = None
         for data in self.imageData:
             img = self.writeTemperature(data["file"], data["temperature"])
-            videoFile.write_frame(np.asanyarray(img))
+            if self.createVideo == True:
+                if videoFile is None: 
+                    from imageTempStich.videoWriter import FFMPEG_VideoWriter
+                    videoFile = FFMPEG_VideoWriter(join(self.outpuPath, "videoOutput.mp4"), img.size, fps=self.fps, pixelFormat="rgba")
+                    
+                videoFile.write_frame(np.asanyarray(img))
     
     def writeTemperature(self, imagePath, temperature):
         image = Image.open(imagePath).convert("RGBA")
